@@ -8,45 +8,105 @@ namespace ImageBrowser
 {
     public partial class Form1 : Form
     {
+        private LogManager _logger;
+        private Queue<string> retryFiles;
+
         public Form1()
         {
             InitializeComponent();
+            _logger = new LogManager();
+            retryFiles = new Queue<string>();
         }
 
         private void dirBrowseButton_Click(object sender, EventArgs e)
-        {
-            DialogResult dr = folderBrowser.ShowDialog();
-            if (dr == DialogResult.OK)
-            {
-                MessageBox.Show(folderBrowser.SelectedPath);
-            }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
         {
             if (folderBrowser.ShowDialog() != DialogResult.OK)
             {
                 return;
             }
-            
-            responseLabel.Text = folderBrowser.SelectedPath;
 
-            string[] fileList = GetImageFiles(folderBrowser.SelectedPath);
+            directoryLabel.Text = folderBrowser.SelectedPath;
+            fileCountLabel.Text = GetImageFiles(folderBrowser.SelectedPath).Length + " files";
+        }
 
-            foreach (string file in fileList)
+        private void runButton_Click(object sender, EventArgs e)
+        {
+            try
             {
-                if (SendFileName(Path.GetFileName(file)))
+                if (!Directory.Exists(folderBrowser.SelectedPath))
                 {
-                    byte[] fileData = File.ReadAllBytes(file);
-                    SendFileData(fileData);
+                    MessageBox.Show("Directory does not exist.");
                 }
+                string[] fileList = GetImageFiles(folderBrowser.SelectedPath);
+                fileProgressBar.Maximum = fileList.Length;
+                fileProgressBar.Minimum = 0;
+                fileProgressBar.Value = 0;
+                fileProgressBar.Step = 1;
+                foreach (string file in fileList)
+                {
+                    try
+                    {
+                        progressLabel.Text = "Current file: " + file;
+                        if (!TransferFile(file))
+                        {
+                            _logger.Error(string.Format("Error while sending file: {0}", file));
+                            retryFiles.Enqueue(file);
+                        }
+                        else
+                        {
+                            fileProgressBar.PerformStep();
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        _logger.Error(string.Format("Error while sending file: {0}", file), exc);
+                        retryFiles.Enqueue(file);
+                    }
+                }
+                while (retryFiles.Count > 0)
+                {
+                    string currentFile = retryFiles.Dequeue();
+                    try
+                    {
+                        progressLabel.Text = "Current file: " + currentFile;
+                        if (!TransferFile(currentFile))
+                        {
+                            _logger.Error(string.Format("Error while sending file: {0}", currentFile));
+                            retryFiles.Enqueue(currentFile);
+                        }
+                        else
+                        {
+                            fileProgressBar.PerformStep();
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        _logger.Error(string.Format("Error while sending file: {0}", currentFile), exc);
+                        retryFiles.Enqueue(currentFile);
+                    }
+                }
+                progressLabel.Text = "Transfer Complete";
             }
+            catch (Exception exc)
+            {
+                _logger.Error("Exception occurred while processing files.", exc);
+            }
+        }
+
+        private bool TransferFile(string file)
+        {
+            if (SendFileName(Path.GetFileName(file)))
+            {
+                byte[] fileData = File.ReadAllBytes(file);
+                return SendFileData(fileData);
+            }
+            return false;
         }
 
         private bool SendFileName(string fileName)
         {
-            string responseText = "";
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("");
+            string responseText;
+            HttpWebRequest req = (HttpWebRequest) WebRequest.Create("http://192.168.254.131:10830");
             req.Method = "POST";
 
             using (StreamWriter writer = new StreamWriter(req.GetRequestStream()))
@@ -54,8 +114,30 @@ namespace ImageBrowser
                 writer.Write(fileName);
                 writer.Flush();
                 writer.Close();
+
+                using (HttpWebResponse httpResponse = (HttpWebResponse) req.GetResponse())
+                {
+                    using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
+                    {
+                        responseText = reader.ReadToEnd();
+                    }
+                }
             }
-            using (HttpWebResponse httpResponse = (HttpWebResponse)req.GetResponse())
+            return responseText == "OK";
+        }
+
+        private bool SendFileData(byte[] fileData)
+        {
+            string responseText;
+            HttpWebRequest req = (HttpWebRequest) WebRequest.Create("http://192.168.254.131:10830");
+            req.Method = "POST";
+            using (Stream s = req.GetRequestStream())
+            {
+                s.Write(fileData, 0, fileData.Length);
+                s.Flush();
+            }
+
+            using (HttpWebResponse httpResponse = (HttpWebResponse) req.GetResponse())
             {
                 using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
                 {
@@ -65,28 +147,9 @@ namespace ImageBrowser
             return responseText == "OK";
         }
 
-        private void SendFileData(byte[] fileData)
-        {
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("");
-            req.Method = "POST";
-            using (Stream s = req.GetRequestStream())
-            {
-                s.Write(fileData, 0, fileData.Length);
-                s.Flush();
-            }
-
-            using (HttpWebResponse httpResponse = (HttpWebResponse)req.GetResponse())
-            {
-                using (StreamReader reader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    responseLabel.Text = reader.ReadToEnd();
-                }
-            }
-        }
-
         private string[] GetImageFiles(string selectedPath)
         {
-            string[] filters = new String[] { "*.jpg", "*.jpeg", "*.png", "*.gif", "*.tiff", "*.bmp", "*.raw" };
+            string[] filters = new String[] {"*.jpg", "*.jpeg", "*.png", "*.gif", "*.tiff", "*.bmp", "*.raw"};
             List<string> fileList = new List<string>();
             foreach (string filter in filters)
             {
