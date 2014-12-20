@@ -28,81 +28,74 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.dirBrowseButton = new System.Windows.Forms.Button();
             this.runButton = new System.Windows.Forms.Button();
             this.directoryLabel = new System.Windows.Forms.Label();
             this.fileCountLabel = new System.Windows.Forms.Label();
             this.fileProgressBar = new System.Windows.Forms.ProgressBar();
-            this.progressLabel = new System.Windows.Forms.Label();
+            this.deleteCheckBox = new System.Windows.Forms.CheckBox();
+            this.progressTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // dirBrowseButton
             // 
-            this.dirBrowseButton.Location = new System.Drawing.Point(12, 38);
+            this.dirBrowseButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            resources.ApplyResources(this.dirBrowseButton, "dirBrowseButton");
             this.dirBrowseButton.Name = "dirBrowseButton";
-            this.dirBrowseButton.Size = new System.Drawing.Size(98, 23);
-            this.dirBrowseButton.TabIndex = 0;
-            this.dirBrowseButton.Text = "Select Directory";
             this.dirBrowseButton.UseVisualStyleBackColor = true;
             this.dirBrowseButton.Click += new System.EventHandler(this.dirBrowseButton_Click);
             // 
             // runButton
             // 
-            this.runButton.Location = new System.Drawing.Point(12, 83);
+            resources.ApplyResources(this.runButton, "runButton");
             this.runButton.Name = "runButton";
-            this.runButton.Size = new System.Drawing.Size(98, 23);
-            this.runButton.TabIndex = 1;
-            this.runButton.Text = "Transfer Files";
             this.runButton.UseVisualStyleBackColor = true;
             this.runButton.Click += new System.EventHandler(this.runButton_Click);
             // 
             // directoryLabel
             // 
-            this.directoryLabel.AutoSize = true;
-            this.directoryLabel.Location = new System.Drawing.Point(12, 9);
+            resources.ApplyResources(this.directoryLabel, "directoryLabel");
             this.directoryLabel.Name = "directoryLabel";
-            this.directoryLabel.Size = new System.Drawing.Size(109, 13);
-            this.directoryLabel.TabIndex = 2;
-            this.directoryLabel.Text = "No directory specified";
             // 
             // fileCountLabel
             // 
-            this.fileCountLabel.AutoSize = true;
-            this.fileCountLabel.Location = new System.Drawing.Point(12, 22);
+            resources.ApplyResources(this.fileCountLabel, "fileCountLabel");
             this.fileCountLabel.Name = "fileCountLabel";
-            this.fileCountLabel.Size = new System.Drawing.Size(34, 13);
-            this.fileCountLabel.TabIndex = 3;
-            this.fileCountLabel.Text = "0 files";
             // 
             // fileProgressBar
             // 
-            this.fileProgressBar.Location = new System.Drawing.Point(12, 112);
+            resources.ApplyResources(this.fileProgressBar, "fileProgressBar");
             this.fileProgressBar.Name = "fileProgressBar";
-            this.fileProgressBar.Size = new System.Drawing.Size(260, 23);
-            this.fileProgressBar.TabIndex = 4;
             // 
-            // progressLabel
+            // deleteCheckBox
             // 
-            this.progressLabel.AutoSize = true;
-            this.progressLabel.Location = new System.Drawing.Point(12, 138);
-            this.progressLabel.Name = "progressLabel";
-            this.progressLabel.Size = new System.Drawing.Size(0, 13);
-            this.progressLabel.TabIndex = 5;
+            resources.ApplyResources(this.deleteCheckBox, "deleteCheckBox");
+            this.deleteCheckBox.Name = "deleteCheckBox";
+            this.deleteCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // progressTextBox
+            // 
+            this.progressTextBox.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            resources.ApplyResources(this.progressTextBox, "progressTextBox");
+            this.progressTextBox.Name = "progressTextBox";
+            this.progressTextBox.ReadOnly = true;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 262);
-            this.Controls.Add(this.progressLabel);
+            this.Controls.Add(this.progressTextBox);
+            this.Controls.Add(this.deleteCheckBox);
             this.Controls.Add(this.fileProgressBar);
             this.Controls.Add(this.fileCountLabel);
             this.Controls.Add(this.directoryLabel);
             this.Controls.Add(this.runButton);
             this.Controls.Add(this.dirBrowseButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.KeyPreview = true;
             this.Name = "Form1";
-            this.Text = "File Transfer";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -116,7 +109,8 @@
         private System.Windows.Forms.Label directoryLabel;
         private System.Windows.Forms.Label fileCountLabel;
         private System.Windows.Forms.ProgressBar fileProgressBar;
-        private System.Windows.Forms.Label progressLabel;
+        private System.Windows.Forms.CheckBox deleteCheckBox;
+        private System.Windows.Forms.TextBox progressTextBox;
     }
 }
 

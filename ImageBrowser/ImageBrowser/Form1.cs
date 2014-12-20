@@ -42,11 +42,11 @@ namespace ImageBrowser
                 fileProgressBar.Minimum = 0;
                 fileProgressBar.Value = 0;
                 fileProgressBar.Step = 1;
+                progressTextBox.Text = "Transferring files.";
                 foreach (string file in fileList)
                 {
                     try
                     {
-                        progressLabel.Text = "Current file: " + file;
                         if (!TransferFile(file))
                         {
                             _logger.Error(string.Format("Error while sending file: {0}", file));
@@ -68,7 +68,6 @@ namespace ImageBrowser
                     string currentFile = retryFiles.Dequeue();
                     try
                     {
-                        progressLabel.Text = "Current file: " + currentFile;
                         if (!TransferFile(currentFile))
                         {
                             _logger.Error(string.Format("Error while sending file: {0}", currentFile));
@@ -85,7 +84,34 @@ namespace ImageBrowser
                         retryFiles.Enqueue(currentFile);
                     }
                 }
-                progressLabel.Text = "Transfer Complete";
+                progressTextBox.Text = "Transfer Complete";
+                if (deleteCheckBox.Checked)
+                {
+                    progressTextBox.Text += " - Deleting transferred files";
+                    fileProgressBar.Value = 0;
+                    fileProgressBar.Maximum -= retryFiles.Count;
+                    foreach (string file in fileList)
+                    {
+                        if (!retryFiles.Contains(file))
+                        {
+                            File.Delete(file);
+                            fileProgressBar.PerformStep();
+                        }
+                    }
+                }
+                progressTextBox.Text = string.Format("Successfully transferred {0} files.", fileList.Length - retryFiles.Count);
+                if (deleteCheckBox.Checked)
+                {
+                    progressTextBox.Text += "\r\nSuccessfully transferred files have been deleted.";
+                }
+                if (retryFiles.Count > 0)
+                {
+                    progressTextBox.Text += string.Format("\r\nFailed on {0} files: ", retryFiles.Count);
+                    foreach (string file in retryFiles)
+                    {
+                        progressTextBox.Text += string.Format("\r\n{0}", file);
+                    }
+                }
             }
             catch (Exception exc)
             {
