@@ -16,18 +16,21 @@
 			return $tag;
 		}
 		
-		function GetDirContents($row) {
+		function GetDirContents() {
 			$dir = 'images/';
 			$f1 = scandir($dir);
 			$html = '<div class="row">';
-			$start = 3 * ($row - 1);
 			$index = 0;
 			foreach($f1 as &$file) {
 				if ($file !== '.' and $file !== '..') {
-					if($index >= $start and $index < $row * 3) {
+					if($index >= $start and $index < 6) {
 						$offset = "";
-						if($index == $start)	{
+						if($index == 0 || $index == 3)	{
 							$offset = ' col-md-offset-1';
+						}
+						if($index == 3)
+						{
+							$html = $html . '</div><div class="row">';
 						}
 						$html = $html . CreateTag($file, $dir, $offset);
 					}
@@ -47,6 +50,7 @@
 		}
 		function showImage(path) {
 			$('#modalImage').attr("src", path);
+			$('#imageModalLabel').html(path);
 		}
 	</script>
 	<body>
@@ -63,16 +67,14 @@
 					<button id=PButton type="button" class="btn btn-primary">Primary</button>
 				</div>
 			</div>
-			<?php echo GetDirContents(1) ?>
-			
-			<?php echo GetDirContents(2) ?>
+			<?php echo GetDirContents() ?>
 		</div>
 		<div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
 		  <div class="modal-dialog">
 			<div class="modal-content">
 			  <div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-				<h4 class="modal-title" id="imageModalLabel">Modal title</h4>
+				<h4 class="modal-title" id="imageModalLabel" style="word-wrap:break-word;max-width:95%">Modal title</h4>
 			  </div>
 			  <div class="modal-body">
 				<img class="img-responsive" id="modalImage" />
