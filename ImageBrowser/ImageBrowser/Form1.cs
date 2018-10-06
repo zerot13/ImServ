@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Windows.Forms;
@@ -132,7 +133,8 @@ namespace ImageBrowser
         private bool SendFileName(string fileName)
         {
             string responseText;
-            HttpWebRequest req = (HttpWebRequest) WebRequest.Create("http://192.168.254.131:10830");
+            string url = ConfigurationManager.AppSettings["urlTarget"];
+            HttpWebRequest req = (HttpWebRequest) WebRequest.Create(url);
             req.Method = "POST";
 
             using (StreamWriter writer = new StreamWriter(req.GetRequestStream()))
@@ -155,7 +157,8 @@ namespace ImageBrowser
         private bool SendFileData(byte[] fileData)
         {
             string responseText;
-            HttpWebRequest req = (HttpWebRequest) WebRequest.Create("http://192.168.254.131:10830");
+            string url = ConfigurationManager.AppSettings["urlTarget"];
+            HttpWebRequest req = (HttpWebRequest) WebRequest.Create(url);
             req.Method = "POST";
             using (Stream s = req.GetRequestStream())
             {
