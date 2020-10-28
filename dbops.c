@@ -12,7 +12,7 @@ int CreateDatabase()
 		LogError("MySql error: %s", mysql_error(conn));
 		return -1;
 	}
-	if(mysql_real_connect(conn, "localhost", "root", "jhsvar56", NULL, 0, NULL, 0) == NULL)
+	if(mysql_real_connect(conn, "localhost", "root", NULL, NULL, 0, NULL, 0) == NULL)
 	{
 		LogError("MySql error 1: %s", mysql_error(conn));
 		mysql_close(conn);
